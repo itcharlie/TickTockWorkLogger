@@ -25,8 +25,9 @@ class StaffMember {
   String name;
   double totalHours;
   double totalTips;
+  String date;
 
-  StaffMember({required this.first_name, this.last_name, this.totalHours = 0, this.totalTips = 0});
+  StaffMember({required this.name, this.totalHours = 0, this.totalTips = 0 , this.date =""});
 }
 
 class StaffProvider extends ChangeNotifier {
@@ -34,29 +35,33 @@ class StaffProvider extends ChangeNotifier {
 
   List<StaffMember> get staff => _staff;
 
-  void addStaff(String first_name, String last_name) {
-    _staff.add(StaffMember(first_name: first_name, last_name: last_name));
+  void addStaff(String name) {
+    _staff.add(StaffMember(name: name));
     notifyListeners();
   }
 
-  void recordWork(StaffMember member, double hours, double tips) {
+  void recordWork(StaffMember member, double hours, double tips, String date) {
     member.totalHours += hours;
     member.totalTips += tips;
+    member.date = date;
     notifyListeners();
   }
 
   Map<String, dynamic> generateSummary() {
     double totalHours = 0;
     double totalTips = 0;
+    String date = "";
 
     for (var member in _staff) {
       totalHours += member.totalHours;
       totalTips += member.totalTips;
+      date = member.date;
     }
 
     return {
       'totalHours': totalHours,
       'totalTips': totalTips,
+      'date': date,
       'staffCount': _staff.length,
     };
   }
@@ -72,7 +77,7 @@ class StaffListScreen extends StatelessWidget {
     var provider = Provider.of<StaffProvider>(context);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Staff Tracker'), actions: [
+      appBar: AppBar(title: const Text('Employee Worklog'), actions: [
         IconButton(
           icon: const Icon(Icons.summarize),
           onPressed: () {
@@ -84,7 +89,8 @@ class StaffListScreen extends StatelessWidget {
                 content: Text(
                   'Staff: ${summary['staffCount']}\n'
                   'Total Hours: ${summary['totalHours']}\n'
-                  'Total Tips: \$${summary['totalTips'].toStringAsFixed(2)}',
+                  'Total Tips: \$${summary['totalTips'].toStringAsFixed(2)}'
+                  'Date: ${summary['date']}\n',
                 ),
                 actions: [
                   TextButton(onPressed: () => Navigator.pop(context), child: const Text('OK'))
@@ -103,7 +109,7 @@ class StaffListScreen extends StatelessWidget {
                 Expanded(
                   child: TextField(
                     controller: _nameController,
-                    decoration: const InputDecoration(labelText: 'Staff Name'),
+                    decoration: const InputDecoration(labelText: 'Employee'),
                   ),
                 ),
                 ElevatedButton(
@@ -125,7 +131,7 @@ class StaffListScreen extends StatelessWidget {
                 var member = provider.staff[index];
                 return ListTile(
                   title: Text(member.name),
-                  subtitle: Text('Hours: ${member.totalHours}, Tips: \$${member.totalTips.toStringAsFixed(2)}'),
+                  subtitle: Text('Hours: ${member.totalHours}, Tips: \$${member.totalTips.toStringAsFixed(2)} Date: ${member.date}'),
                   trailing: IconButton(
                     icon: const Icon(Icons.add),
                     onPressed: () {
@@ -144,7 +150,7 @@ class StaffListScreen extends StatelessWidget {
   void _showRecordDialog(BuildContext context, StaffProvider provider, StaffMember member) {
     final hoursController = TextEditingController();
     final tipsController = TextEditingController();
-
+    final dateController = TextEditingController();
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
@@ -162,6 +168,11 @@ class StaffListScreen extends StatelessWidget {
               keyboardType: TextInputType.number,
               decoration: const InputDecoration(labelText: 'Tips Earned'),
             ),
+            TextField(
+              controller: dateController,
+              keyboardType: TextInputType.datetime,
+              decoration: const InputDecoration(labelText: 'Date Worked'),
+            ),
           ],
         ),
         actions: [
@@ -169,7 +180,8 @@ class StaffListScreen extends StatelessWidget {
             onPressed: () {
               double hours = double.tryParse(hoursController.text) ?? 0;
               double tips = double.tryParse(tipsController.text) ?? 0;
-              provider.recordWork(member, hours, tips);
+              String date = dateController.text;
+              provider.recordWork(member, hours, tips, date);
               Navigator.pop(context);
             },
             child: const Text('Save'),
