@@ -22,12 +22,13 @@ class TimeTrackingApp extends StatelessWidget {
 }
 
 class StaffMember {
-  String name;
+  String firstName;
+  String lastName;
   double totalHours;
   double totalTips;
   String date;
 
-  StaffMember({required this.name, this.totalHours = 0, this.totalTips = 0 , this.date =""});
+  StaffMember({required this.firstName, required this.lastName, this.totalHours = 0, this.totalTips = 0 , this.date =""});
 }
 
 class StaffProvider extends ChangeNotifier {
@@ -35,8 +36,8 @@ class StaffProvider extends ChangeNotifier {
 
   List<StaffMember> get staff => _staff;
 
-  void addStaff(String name) {
-    _staff.add(StaffMember(name: name));
+  void addStaff(String firstName,String lastName) {
+    _staff.add(StaffMember(firstName: firstName, lastName: lastName));
     notifyListeners();
   }
 
@@ -68,7 +69,8 @@ class StaffProvider extends ChangeNotifier {
 }
 
 class StaffListScreen extends StatelessWidget {
-  final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _firstNameController = TextEditingController();
+  final TextEditingController _lastNameController = TextEditingController();
 
   StaffListScreen({super.key});
 
@@ -106,17 +108,21 @@ class StaffListScreen extends StatelessWidget {
             padding: const EdgeInsets.all(8.0),
             child: Row(
               children: [
-                Expanded(
-                  child: TextField(
-                    controller: _nameController,
-                    decoration: const InputDecoration(labelText: 'Employee'),
-                  ),
-                ),
+                Expanded(child:  TextField(
+                    controller: _firstNameController,
+                    decoration: const InputDecoration(labelText: 'First Name'),
+                  )),
+                Expanded(child:TextField(
+                    controller:_lastNameController,
+                    decoration:const InputDecoration(labelText: 'Last Name')
+                 )),
+                  
                 ElevatedButton(
                   onPressed: () {
-                    if (_nameController.text.isNotEmpty) {
-                      provider.addStaff(_nameController.text);
-                      _nameController.clear();
+                    if (_firstNameController.text.isNotEmpty || _lastNameController.text.isNotEmpty ) {
+                      provider.addStaff(_firstNameController.text,_lastNameController.text );
+                      _firstNameController.clear();
+                      _lastNameController.clear();
                     }
                   },
                   child: const Text('Add'),
@@ -130,7 +136,7 @@ class StaffListScreen extends StatelessWidget {
               itemBuilder: (context, index) {
                 var member = provider.staff[index];
                 return ListTile(
-                  title: Text(member.name),
+                  title: Text("${member.firstName}  ${member.lastName} "),
                   subtitle: Text('Hours: ${member.totalHours}, Tips: \$${member.totalTips.toStringAsFixed(2)} Date: ${member.date}'),
                   trailing: IconButton(
                     icon: const Icon(Icons.add),
@@ -154,7 +160,7 @@ class StaffListScreen extends StatelessWidget {
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
-        title: Text('Record for ${member.name}'),
+        title: Text('Record for ${member.firstName} ${member.lastName}'),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
