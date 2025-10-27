@@ -42,6 +42,17 @@ class StaffProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  void editStaff(StaffMember member, String newFirstName, String newLastName) {
+    member.firstName = newFirstName;
+    member.lastName = newLastName;
+    notifyListeners();
+  }
+
+  void deleteStaff(StaffMember member) {
+    _staff.remove(member);
+    notifyListeners();
+  }
+
   void recordWork(StaffMember member, double hours, double tips, String date) {
     member.totalHours += hours;
     member.totalTips += tips;
@@ -127,7 +138,8 @@ class StaffListScreen extends StatelessWidget {
                     }
                   },
                   child: const Text('Add'),
-                )
+                ),
+ 
               ],
             ),
           ),
@@ -139,11 +151,28 @@ class StaffListScreen extends StatelessWidget {
                 return ListTile(
                   title: Text("${member.firstName}  ${member.lastName} "),
                   subtitle: Text('Hours: ${member.totalHours}, Tips: \$${member.totalTips.toStringAsFixed(2)} Date: ${member.date}'),
-                  trailing: IconButton(
-                    icon: const Icon(Icons.add),
-                    onPressed: () {
-                      _showRecordDialog(context, provider, member);
-                    },
+                  trailing: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      IconButton(
+                        icon: const Icon(Icons.add),
+                        onPressed: () {
+                          _showRecordDialog(context, provider, member);
+                        },
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.edit),
+                        onPressed: () {
+                          _showEditDialog(context, provider, member);
+                        },
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.delete),
+                        onPressed: () {
+                          provider.deleteStaff(member);
+                        },
+                      ),
+                    ],
                   ),
                 );
               },
@@ -189,6 +218,39 @@ class StaffListScreen extends StatelessWidget {
               double tips = double.tryParse(tipsController.text) ?? 0;
               String date = dateController.text;
               provider.recordWork(member, hours, tips, date);
+              Navigator.pop(context);
+            },
+            child: const Text('Save'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showEditDialog(BuildContext context, StaffProvider provider, StaffMember member) {
+    final firstNameController = TextEditingController(text: member.firstName);
+    final lastNameController = TextEditingController(text: member.lastName);
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text('Edit Staff Member'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: firstNameController,
+              decoration: const InputDecoration(labelText: 'First Name'),
+            ),
+            TextField(
+              controller: lastNameController,
+              decoration: const InputDecoration(labelText: 'Last Name'),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              provider.editStaff(member, firstNameController.text, lastNameController.text);
               Navigator.pop(context);
             },
             child: const Text('Save'),
