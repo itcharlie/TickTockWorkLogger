@@ -186,7 +186,8 @@ class StaffListScreen extends StatelessWidget {
   void _showRecordDialog(BuildContext context, StaffProvider provider, StaffMember member) {
     final hoursController = TextEditingController();
     final tipsController = TextEditingController();
-    final dateController = TextEditingController();
+    DateTime selectedDate = DateTime.now();
+
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
@@ -204,10 +205,20 @@ class StaffListScreen extends StatelessWidget {
               keyboardType: TextInputType.number,
               decoration: const InputDecoration(labelText: 'Tips Earned'),
             ),
-            TextField(
-              controller: dateController,
-              keyboardType: TextInputType.datetime,
-              decoration: const InputDecoration(labelText: 'Date Worked'),
+            ListTile(
+              title: Text("Date: ${selectedDate.toLocal()}".split(' ')[0]),
+              trailing: const Icon(Icons.calendar_today),
+              onTap: () async {
+                final DateTime? picked = await showDatePicker(
+                  context: context,
+                  initialDate: selectedDate,
+                  firstDate: DateTime(2000),
+                  lastDate: DateTime(2101),
+                );
+                if (picked != null && picked != selectedDate) {
+                  selectedDate = picked;
+                }
+              },
             ),
           ],
         ),
@@ -216,7 +227,7 @@ class StaffListScreen extends StatelessWidget {
             onPressed: () {
               double hours = double.tryParse(hoursController.text) ?? 0;
               double tips = double.tryParse(tipsController.text) ?? 0;
-              String date = dateController.text;
+              String date = "${selectedDate.toLocal()}".split(' ')[0];
               provider.recordWork(member, hours, tips, date);
               Navigator.pop(context);
             },
