@@ -22,14 +22,23 @@ class TimeTrackingApp extends StatelessWidget {
   }
 }
 
+class WorkEntry {
+  double hours;
+  double tips;
+  String date;
+
+  WorkEntry({required this.hours, required this.tips, required this.date});
+}
+
 class StaffMember {
   String firstName;
   String lastName;
-  double totalHours;
-  double totalTips;
-  String date;
+  List<WorkEntry> workEntries = [];
 
-  StaffMember({required this.firstName, required this.lastName, this.totalHours = 0, this.totalTips = 0 , this.date =""});
+  StaffMember({required this.firstName, required this.lastName});
+
+  double get totalHours => workEntries.fold(0, (sum, entry) => sum + entry.hours);
+  double get totalTips => workEntries.fold(0, (sum, entry) => sum + entry.tips);
 }
 
 class StaffProvider extends ChangeNotifier {
@@ -54,27 +63,22 @@ class StaffProvider extends ChangeNotifier {
   }
 
   void recordWork(StaffMember member, double hours, double tips, String date) {
-    member.totalHours += hours;
-    member.totalTips += tips;
-    member.date = date;
+    member.workEntries.add(WorkEntry(hours: hours, tips: tips, date: date));
     notifyListeners();
   }
 
   Map<String, dynamic> generateSummary() {
     double totalHours = 0;
     double totalTips = 0;
-    String date = "";
 
     for (var member in _staff) {
       totalHours += member.totalHours;
       totalTips += member.totalTips;
-      date = member.date;
     }
 
     return {
       'totalHours': totalHours,
       'totalTips': totalTips,
-      'date': date,
       'staffCount': _staff.length,
     };
   }
@@ -103,8 +107,7 @@ class StaffListScreen extends StatelessWidget {
                 content: Text(
                   'Staff: ${summary['staffCount']}\n'
                   'Total Hours: ${summary['totalHours']}\n'
-                  'Total Tips: \$${summary['totalTips'].toStringAsFixed(2)}'
-                  'Date: ${summary['date']}\n',
+                  'Total Tips: \$${summary['totalTips'].toStringAsFixed(2)}',
                 ),
                 actions: [
                   TextButton(onPressed: () => Navigator.pop(context), child: const Text('OK'))
@@ -150,7 +153,15 @@ class StaffListScreen extends StatelessWidget {
                 var member = provider.staff[index];
                 return ListTile(
                   title: Text("${member.firstName}  ${member.lastName} "),
-                  subtitle: Text('Hours: ${member.totalHours}, Tips: \$${member.totalTips.toStringAsFixed(2)} Date: ${member.date}'),
+                  subtitle: Text('Hours: ${member.totalHours}, Tips: \$${member.totalTips.toStringAsFixed(2)}'),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => WorkEntriesScreen(member: member),
+                      ),
+                    );
+                  },
                   trailing: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
@@ -267,6 +278,29 @@ class StaffListScreen extends StatelessWidget {
             child: const Text('Save'),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class WorkEntriesScreen extends StatelessWidget {
+  final StaffMember member;
+
+  const WorkEntriesScreen({super.key, required this.member});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text('${member.firstName} ${member.lastName}')),
+      body: ListView.builder(
+        itemCount: member.workEntries.length,
+        itemBuilder: (context, index) {
+          var entry = member.workEntries[index];
+          return ListTile(
+            title: Text('Date: ${entry.date}'),
+            subtitle: Text('Hours: ${entry.hours}, Tips: \$${entry.tips.toStringAsFixed(2)}'),
+          );
+        },
       ),
     );
   }
