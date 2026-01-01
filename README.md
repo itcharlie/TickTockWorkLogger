@@ -1,6 +1,6 @@
 # TickTockWorkLogger
 
-TickTockWorkLogger is a Flutter application designed to help manage staff members and track their work hours and tips. It provides a simple and efficient way to record daily work entries and generate summaries for all staff.
+TickTockWorkLogger is a streamlined Flutter application designed to empower individuals and small businesses in efficiently managing staff and meticulously tracking work hours and tips. This tool simplifies daily work entry recording and provides comprehensive summaries for all team members, enhancing organizational efficiency and financial oversight.
 
 ## This software is not Production ready!!! use at your own risk
 

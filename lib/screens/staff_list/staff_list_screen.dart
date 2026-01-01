@@ -74,7 +74,7 @@ class StaffListScreen extends StatelessWidget {
                   itemBuilder: (context, index) {
                     var member = provider.staff[index];
                     return ListTile(
-                      title: Text("${member.firstName}  ${member.lastName} "),
+                      title: Text("${member.firstName} ${member.lastName}"),
                       subtitle: Text('Hours: ${member.totalHours}, Tips: \$${member.totalTips.toStringAsFixed(2)}'),
                       onTap: () {
                         Navigator.push(

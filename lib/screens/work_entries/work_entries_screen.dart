@@ -9,7 +9,7 @@ class WorkEntriesScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('${member.firstName} ${member.lastName}')),
+      appBar: AppBar(title: Text('Work Entries for ${member.firstName} ${member.lastName}')),
       body: ListView.builder(
         itemCount: member.workEntries.length,
         itemBuilder: (context, index) {
