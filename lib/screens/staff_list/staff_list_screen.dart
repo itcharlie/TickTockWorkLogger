@@ -67,44 +67,48 @@ class StaffListScreen extends StatelessWidget {
             ),
           ),
           Expanded(
-            child: ListView.builder(
-              itemCount: provider.staff.length,
-              itemBuilder: (context, index) {
-                var member = provider.staff[index];
-                return ListTile(
-                  title: Text("${member.firstName}  ${member.lastName} "),
-                  subtitle: Text('Hours: ${member.totalHours}, Tips: \$${member.totalTips.toStringAsFixed(2)}'),
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => WorkEntriesScreen(member: member),
+            child: Consumer<StaffProvider>(
+              builder: (context, provider, child) {
+                return ListView.builder(
+                  itemCount: provider.staff.length,
+                  itemBuilder: (context, index) {
+                    var member = provider.staff[index];
+                    return ListTile(
+                      title: Text("${member.firstName}  ${member.lastName} "),
+                      subtitle: Text('Hours: ${member.totalHours}, Tips: \$${member.totalTips.toStringAsFixed(2)}'),
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => WorkEntriesScreen(member: member),
+                          ),
+                        );
+                      },
+                      trailing: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          IconButton(
+                            icon: const Icon(Icons.add),
+                            onPressed: () {
+                              _showRecordDialog(context, provider, member);
+                            },
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.edit),
+                            onPressed: () {
+                              _showEditDialog(context, provider, member);
+                            },
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.delete),
+                            onPressed: () {
+                              provider.deleteStaff(member);
+                            },
+                          ),
+                        ],
                       ),
                     );
                   },
-                  trailing: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      IconButton(
-                        icon: const Icon(Icons.add),
-                        onPressed: () {
-                          _showRecordDialog(context, provider, member);
-                        },
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.edit),
-                        onPressed: () {
-                          _showEditDialog(context, provider, member);
-                        },
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.delete),
-                        onPressed: () {
-                          provider.deleteStaff(member);
-                        },
-                      ),
-                    ],
-                  ),
                 );
               },
             ),
